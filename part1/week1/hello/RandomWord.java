@@ -5,7 +5,7 @@ import edu.princeton.cs.algs4.StdRandom;
 public class RandomWord {
     public static void main(String[] args) {
         String winner = null;
-        String tmp = null;
+        String tmp;
         int p = 1;
         while (!StdIn.isEmpty()) {
             tmp = StdIn.readString();
