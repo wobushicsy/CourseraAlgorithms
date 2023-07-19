@@ -25,24 +25,26 @@ public class Percolation {
     }
 
     private boolean isInGrid(int row, int col) {
-        return row >= 0 && row < length && col >= 0 && col < length;
+        return row >= 1 && row < length + 1 && col >= 1 && col < length + 1;
     }
 
     private int getIndex(int row, int col) {
+        row -= 1;
+        col -= 1;
         return row * length + col + 1;
     }
 
     // opens the site (row, col) if it is not open already
     public void open(int row, int col) {
         if (!isInGrid(row, col)) {
-            throw new IllegalArgumentException("Variable row and col must be in range(0, length)");
+            throw new IllegalArgumentException("Variable row and col must be in range(1, length+1)");
         }
         if (isOpen(row, col)) {
             return;
         }
         int index = getIndex(row, col);
         numOfOpen += 1;
-        open[row][col] = true;
+        open[row-1][col-1] = true;
         if (isInGrid(row + 1, col) && isOpen(row + 1, col)) {
             int upIndex = getIndex(row + 1, col);
             uf.union(index, upIndex);
@@ -70,7 +72,7 @@ public class Percolation {
         if (!isInGrid(row, col)) {
             throw new IllegalArgumentException("Variable row and col must be in range(0, length)");
         }
-        return open[row][col];
+        return open[row - 1][col - 1];
     }
 
     // is the site (row, col) full?
@@ -78,7 +80,7 @@ public class Percolation {
         if (!isInGrid(row, col)) {
             throw new IllegalArgumentException("Variable row and col must be in range(0, length)");
         }
-        return isOpen(row, col) && ufWithTop.connected(getIndex(row, col), 0);
+        return isOpen(row, col) && ufWithTop.find(getIndex(row, col)) == ufWithTop.find(0);
     }
 
     // returns the number of open sites
@@ -88,25 +90,26 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates() {
-        return uf.connected(0, length * length + 1) && numOfOpen > 0;
+        return uf.find(0) == uf.find(length * length + 1) && numOfOpen > 0;
     }
 
     // test client (optional)
     public static void main(String[] args) {
-        Percolation per = new Percolation(5);
-        per.open(0, 0);
-        per.open(0, 1);
-        per.open(1, 3);
-        per.open(2, 3);
-        per.open(3, 3);
-        per.open(4, 4);
-        System.out.println(per.isFull(4, 4));
-        per.open(3, 2);
-        per.open(3, 1);
-        per.open(4, 1);
+//        Percolation per = new Percolation(5);
+//        per.open(0, 0);
+//        per.open(0, 0);
+//        per.open(0, 1);
+//        per.open(1, 3);
+//        per.open(2, 3);
+//        per.open(3, 3);
+//        per.open(4, 4);
+//        System.out.println(per.isFull(4, 4));
+//        per.open(3, 2);
+//        per.open(3, 1);
+//        per.open(4, 1);
 //        per.open(5, 1);
-        System.out.println(per.percolates());
-        per.open(0, 3);
-        System.out.println(per.percolates());
+//        System.out.println(per.percolates());
+//        per.open(0, 3);
+//        System.out.println(per.percolates());
     }
 }
