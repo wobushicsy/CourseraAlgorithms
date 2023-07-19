@@ -32,13 +32,13 @@ public class PercolationStats {
             cnt = 0;
             open = new boolean[n][n];
             pf = new Percolation(n);
-            row = StdRandom.uniformInt(n) + 1;
-            col = StdRandom.uniformInt(n) + 1;
+            row = StdRandom.uniform(n) + 1;
+            col = StdRandom.uniform(n) + 1;
             open[row - 1][col - 1] = true;
             while (!pf.percolates()) {
                 while (open[row - 1][col - 1]) {
-                    row = StdRandom.uniformInt(n) + 1;
-                    col = StdRandom.uniformInt(n) + 1;
+                    row = StdRandom.uniform(n) + 1;
+                    col = StdRandom.uniform(n) + 1;
                 }
                 open[row - 1][col - 1] = true;
                 cnt += 1;
