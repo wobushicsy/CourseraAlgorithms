@@ -9,6 +9,9 @@ public class Percolation {
 
     // creates n-by-n grid, with all sites initially blocked
     public Percolation(int n) {
+        if (n <= 0) {
+            throw new IllegalArgumentException("variable n must be a positive number");
+        }
         length = n;
         numOfOpen = 0;
         uf = new WeightedQuickUnionUF(n * n + 2);
@@ -31,28 +34,31 @@ public class Percolation {
 
     // opens the site (row, col) if it is not open already
     public void open(int row, int col) {
-        if (isOpen(row, col) || !isInGrid(row, col)) {
+        if (!isInGrid(row, col)) {
+            throw new IllegalArgumentException("Variable row and col must be in range(0, length)");
+        }
+        if (isOpen(row, col)) {
             return;
         }
         int index = getIndex(row, col);
         numOfOpen += 1;
         open[row][col] = true;
-        if (isOpen(row + 1, col)) {
+        if (isInGrid(row + 1, col) && isOpen(row + 1, col)) {
             int upIndex = getIndex(row + 1, col);
             uf.union(index, upIndex);
             ufWithTop.union(index, upIndex);
         }
-        if (isOpen(row - 1, col)) {
+        if (isInGrid(row - 1, col) && isOpen(row - 1, col)) {
             int downIndex = getIndex(row - 1, col);
             uf.union(index, downIndex);
             ufWithTop.union(index, downIndex);
         }
-        if (isOpen(row, col - 1)) {
+        if (isInGrid(row, col - 1) && isOpen(row, col - 1)) {
             int leftIndex = getIndex(row, col - 1);
             uf.union(index, leftIndex);
             ufWithTop.union(index, leftIndex);
         }
-        if (isOpen(row, col + 1)) {
+        if (isInGrid(row, col + 1) && isOpen(row, col + 1)) {
             int rightIndex = getIndex(row, col + 1);
             uf.union(index, rightIndex);
             ufWithTop.union(index, rightIndex);
@@ -61,11 +67,17 @@ public class Percolation {
 
     // is the site (row, col) open?
     public boolean isOpen(int row, int col) {
-        return isInGrid(row, col) && open[row][col];
+        if (!isInGrid(row, col)) {
+            throw new IllegalArgumentException("Variable row and col must be in range(0, length)");
+        }
+        return open[row][col];
     }
 
     // is the site (row, col) full?
     public boolean isFull(int row, int col) {
+        if (!isInGrid(row, col)) {
+            throw new IllegalArgumentException("Variable row and col must be in range(0, length)");
+        }
         return isOpen(row, col) && ufWithTop.connected(getIndex(row, col), 0);
     }
 
@@ -92,6 +104,7 @@ public class Percolation {
         per.open(3, 2);
         per.open(3, 1);
         per.open(4, 1);
+//        per.open(5, 1);
         System.out.println(per.percolates());
         per.open(0, 3);
         System.out.println(per.percolates());
