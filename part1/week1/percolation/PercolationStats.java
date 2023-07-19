@@ -7,7 +7,7 @@ public class PercolationStats {
     private double mean;
     private double stddev;
     private int t;
-    private final static double RATE = 1.96;
+    private double rate;
 
     // perform independent trials on an n-by-n grid
     public PercolationStats(int n, int trials) {
@@ -18,6 +18,7 @@ public class PercolationStats {
         // declare variables
         boolean[][] open;
         Percolation pf;
+        rate = 1.96;
         mean = 0;
         stddev = 0;
         t = trials;
@@ -65,26 +66,22 @@ public class PercolationStats {
 
     // low endpoint of 95% confidence interval
     public double confidenceLo() {
-        return mean() - RATE * stddev() / Math.sqrt(t);
+        return mean() - rate * stddev() / Math.sqrt(t);
     }
 
     // high endpoint of 95% confidence interval
     public double confidenceHi() {
-        return mean() + RATE * stddev() / Math.sqrt(t);
+        return mean() + rate * stddev() / Math.sqrt(t);
     }
 
     // test client (see below)
     public static void main(String[] args) {
-//        args = new String[2];
-//        args[0] = "200";
-//        args[1] = "100";
         if (args.length != 2) {
             throw new IllegalArgumentException("expect two positive arguments");
         }
         int n = Integer.parseInt(args[0]);
-        int T = Integer.parseInt(args[1]);
-        PercolationStats ps = new PercolationStats(n, T);
-//        PercolationStats ps = new PercolationStats(200, 100);
+        int trails = Integer.parseInt(args[1]);
+        PercolationStats ps = new PercolationStats(n, trails);
         StdOut.println("mean                    = " + ps.mean());
         StdOut.println("stddev                  = " + ps.stddev());
         StdOut.println("95% confidence interval = [" + ps.confidenceLo() + ", " + ps.confidenceHi() + "]");
