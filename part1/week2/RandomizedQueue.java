@@ -20,7 +20,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // add the item
     public void enqueue(Item item) {
-        return null;
+
     }
 
     // remove and return a random item
@@ -40,7 +40,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     // unit testing (required)
     public static void main(String[] args) {
-        
+
     }
 
 }
