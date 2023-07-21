@@ -1,7 +1,5 @@
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
-import edu.princeton.cs.algs4.FibonacciMinPQ;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Deque<Item> implements Iterable<Item> {
@@ -75,7 +73,7 @@ public class Deque<Item> implements Iterable<Item> {
 
     // remove and return the item from the front
     public Item removeFirst() {
-        if (size <= 0) {
+        if (isEmpty()) {
             throw new NoSuchElementException("No element in Deque");
         }
         size -= 1;
@@ -89,7 +87,7 @@ public class Deque<Item> implements Iterable<Item> {
 
     // remove and return the item from the back
     public Item removeLast() {
-        if (size <= 0) {
+        if (isEmpty()) {
             throw new NoSuchElementException("No element in Deque");
         }
         size -= 1;
@@ -121,10 +119,18 @@ public class Deque<Item> implements Iterable<Item> {
 
         @Override
         public Item next() {
+            if (isEmpty()) {
+                throw new NoSuchElementException("No element in Deque");
+            }
             Item item = pointer.item;
             pointer = pointer.next;
 
             return item;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Unsupported operation: remove()");
         }
     }
 
