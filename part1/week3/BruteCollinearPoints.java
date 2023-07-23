@@ -18,9 +18,9 @@ public class BruteCollinearPoints {
                 throw new IllegalArgumentException("Item in Points is a null");
             }
         }
-        int N = points.length;
-        for (int i = 0; i < N - 1; i += 1) {
-            for (int j = i + 1; j < N; j += 1) {
+        int length = points.length;
+        for (int i = 0; i < length - 1; i += 1) {
+            for (int j = i + 1; j < length; j += 1) {
                 if (points[i].compareTo(points[j]) == 0) {
                     throw new IllegalArgumentException("The argument to the constructor contains a repeated point");
                 }
@@ -31,18 +31,18 @@ public class BruteCollinearPoints {
         Arrays.sort(sortedPoints);
         LinkedList<LineSegment> list = new LinkedList<>();
 
-        for (int i = 0; i < N - 3; i += 1) {
+        for (int i = 0; i < length - 3; i += 1) {
             Point p0 = sortedPoints[i];
-            for (int j = i + 1; j < N - 2; j += 1) {
+            for (int j = i + 1; j < length - 2; j += 1) {
                 Point p1 = sortedPoints[j];
                 double slope01 = p0.slopeTo(p1);
-                for (int k = j + 1; k < N - 1; k += 1) {
+                for (int k = j + 1; k < length - 1; k += 1) {
                     Point p2 = sortedPoints[k];
                     double slope02 = p0.slopeTo(p2);
                     if (slope02 != slope01)
                         continue;
-                    for (int l = k + 1; l < N; l += 1) {
-                        Point p3 = sortedPoints[l];
+                    for (int item = k + 1; item < length; item += 1) {
+                        Point p3 = sortedPoints[item];
                         double slope03 = p0.slopeTo(p3);
                         if (slope01 != slope03)
                             continue;

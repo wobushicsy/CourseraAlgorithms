@@ -18,9 +18,9 @@ public class FastCollinearPoints {
                 throw new IllegalArgumentException("Item in Points is a null");
             }
         }
-        int N = points.length;
-        for (int i = 0; i < N - 1; i += 1) {
-            for (int j = i + 1; j < N; j += 1) {
+        int length = points.length;
+        for (int i = 0; i < length - 1; i += 1) {
+            for (int j = i + 1; j < length; j += 1) {
                 if (points[i].compareTo(points[j]) == 0) {
                     throw new IllegalArgumentException("The argument to the constructor contains a repeated point");
                 }
@@ -32,7 +32,7 @@ public class FastCollinearPoints {
         LinkedList<LineSegment> list = new LinkedList<>();
         LinkedList<Point> searchedPoints = new LinkedList<>();
 
-        for (int i = 0; i < N; i += 1) {
+        for (int i = 0; i < length; i += 1) {
             Point p = sortedPoints[i];
             if (searchedPoints.contains(p)) {
                 continue;
@@ -42,10 +42,10 @@ public class FastCollinearPoints {
             int cnt;
 
             // p.slopeTo(p) = Double.NEGATIVE_INFINITY, so we start by 1
-            for (int j = 1; j < N; j += cnt) {
+            for (int j = 1; j < length; j += cnt) {
                 cnt = 1;
                 double slope = p.slopeTo(slopeSortedPoints[j]);
-                for (int k = j + 1; k < N; k += 1) {
+                for (int k = j + 1; k < length; k += 1) {
                     if (p.slopeTo(slopeSortedPoints[k]) == slope)
                         cnt += 1;
                     else
