@@ -60,7 +60,8 @@ public class FastCollinearPoints {
                     tmp[cnt] = p;
                     searchedPoints.add(p);
                     Arrays.sort(tmp);
-                    list.add(new LineSegment(tmp[0], tmp[cnt]));
+                    LineSegment newLine = new LineSegment(tmp[0], tmp[cnt]);
+                    list.add(newLine);
                 }
             }
         }
