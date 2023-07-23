@@ -52,11 +52,15 @@ public class FastCollinearPoints {
                         break;
                 }
                 if (cnt >= 3) {
+                    Point[] tmp = new Point[cnt + 1];
                     for (int k = 0; k < cnt; k += 1) {
                         searchedPoints.add(slopeSortedPoints[j + k]);
+                        tmp[k] = slopeSortedPoints[j + k];
                     }
+                    tmp[cnt] = p;
                     searchedPoints.add(p);
-                    list.add(new LineSegment(p, slopeSortedPoints[j + cnt - 1]));
+                    Arrays.sort(tmp);
+                    list.add(new LineSegment(tmp[0], tmp[cnt]));
                 }
             }
         }
