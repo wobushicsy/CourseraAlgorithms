@@ -75,8 +75,6 @@ public class FastCollinearPoints {
     }
 
     public static void main(String[] args) {
-        args = new String[1];
-        args[0] = "input8.txt";
 
         // read the n points from a file
         In in = new In(args[0]);
