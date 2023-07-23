@@ -26,19 +26,57 @@ public class FastCollinearPoints {
                 }
             }
         }
+
+        Point[] sortedPoints = points.clone();
+        Arrays.sort(sortedPoints);
+        LinkedList<LineSegment> list = new LinkedList<>();
+        LinkedList<Point> searchedPoints = new LinkedList<>();
+
+        for (int i = 0; i < N; i += 1) {
+            Point p = sortedPoints[i];
+            if (searchedPoints.contains(p)) {
+                continue;
+            }
+            Point[] slopeSortedPoints = sortedPoints.clone();
+            Arrays.sort(slopeSortedPoints, p.slopeOrder());
+            int cnt;
+
+            // p.slopeTo(p) = Double.NEGATIVE_INFINITY, so we start by 1
+            for (int j = 1; j < N; j += cnt) {
+                cnt = 1;
+                double slope = p.slopeTo(slopeSortedPoints[j]);
+                for (int k = j + 1; k < N; k += 1) {
+                    if (p.slopeTo(slopeSortedPoints[k]) == slope)
+                        cnt += 1;
+                    else
+                        break;
+                }
+                if (cnt >= 3) {
+                    for (int k = 0; k < cnt; k += 1) {
+                        searchedPoints.add(slopeSortedPoints[j + k]);
+                    }
+                    searchedPoints.add(p);
+                    list.add(new LineSegment(p, slopeSortedPoints[j + cnt - 1]));
+                }
+            }
+        }
+
+        lineSegments = list.toArray(new LineSegment[0]);
     }
 
     // the number of line segments
     public int numberOfSegments() {
-        return 0;
+        return lineSegments.length;
     }
 
     // the line segments
     public LineSegment[] segments() {
-        return null;
+        return lineSegments.clone();
     }
 
     public static void main(String[] args) {
+        args = new String[1];
+        args[0] = "input8.txt";
 
         // read the n points from a file
         In in = new In(args[0]);
