@@ -40,12 +40,12 @@ public class BruteCollinearPoints {
                     Point p2 = sortedPoints[k];
                     double slope02 = p0.slopeTo(p2);
                     if (slope02 != slope01)
-                        break;
+                        continue;
                     for (int l = k + 1; l < N; l += 1) {
                         Point p3 = sortedPoints[l];
                         double slope03 = p0.slopeTo(p3);
                         if (slope01 != slope03)
-                            break;
+                            continue;
                         list.add(new LineSegment(p0, p3));
                     }
                 }
