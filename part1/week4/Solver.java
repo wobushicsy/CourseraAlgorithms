@@ -17,6 +17,10 @@ public class Solver {
     private final HashSet<Board> searched;
     private Deque<Board> solution;
 
+    // caches
+    private final HashMap<Board, Integer> manhattanCache;
+    private final HashMap<Board, Integer> hammingCache;
+
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
@@ -32,6 +36,8 @@ public class Solver {
         searched = new HashSet<>();
         move = -1;
         solution = null;
+        hammingCache = new HashMap<>();
+        manhattanCache = new HashMap<>();
 
         // solve the problem
         astar(initial);
@@ -51,15 +57,24 @@ public class Solver {
     private class pqComparator<T extends Board> implements Comparator<T> {
         @Override
         public int compare(T o1, T o2) {
-            int dis1 = moves.get(o1) + o1.manhattan();
-            int dis2 = moves.get(o2) + o2.manhattan();
+            if (manhattanCache.get(o1) == null) {
+                manhattanCache.put(o1, o1.manhattan());
+            }
+            if (manhattanCache.get(o2) == null) {
+                manhattanCache.put(o2, o2.manhattan());
+            }
+            int dis1 = moves.get(o1) + manhattanCache.get(o1);
+            int dis2 = moves.get(o2) + manhattanCache.get(o2);
 
             return dis1 - dis2;
         }
     }
 
     private void astar(Board state) {
-        if (state.hamming() == 2) {
+        if (hammingCache.get(state) == null) {
+            hammingCache.put(state, state.hamming());
+        }
+        if (hammingCache.get(state) == 2) {
             if (state.twin().isGoal()) {
                 isSolvable = false;
                 return;
@@ -78,6 +93,9 @@ public class Solver {
         for (Board neighbor: state.neighbors()) {
             if (searched.contains(neighbor)) {
                 continue;
+            }
+            if (hammingCache.get(neighbor) == null) {
+                hammingCache.put(neighbor, neighbor.hamming());
             }
             moves.put(neighbor, moves.get(state) + 1);
             pq.insert(neighbor);
