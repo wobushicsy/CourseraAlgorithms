@@ -107,7 +107,7 @@ public class Board {
     private Board getNeighbor(int[][] board, int pos0I, int pos0J, int exI, int exJ) {
         int[][] tiles = copyBoard(board);
         int tmp = tiles[pos0I][pos0J];
-        tiles[pos0I][pos0I] = tiles[exI][exJ];
+        tiles[pos0I][pos0J] = tiles[exI][exJ];
         tiles[exI][exJ] = tmp;
 
         return new Board(tiles);
@@ -155,22 +155,46 @@ public class Board {
 
     // a board that is obtained by exchanging any pair of tiles
     public Board twin() {
+        // if hamming() != 2, return a board with one row exchange 2 values
+        // else, exchange two values on wrong position
         int[][] newBoard = copyBoard(board);
-        boolean changed = false;
-        for (int i = 0; i < length; i += 1) {
-            if (changed) {
-                break;
-            }
-            for (int j = 0; j < length - 1; j += 1) {
-                if (!(newBoard[i][j] > 0 && newBoard[i][j + 1] > 0)) {
-                    continue;
+        if (hamming() != 2) {
+            boolean changed = false;
+            for (int i = 0; i < length; i += 1) {
+                if (changed) {
+                    break;
                 }
-                int tmp = newBoard[i][j];
-                newBoard[i][j] = newBoard[i][j + 1];
-                newBoard[i][j + 1] = tmp;
-                changed = true;
-                break;
+                for (int j = 0; j < length - 1; j += 1) {
+                    if (!(newBoard[i][j] > 0 && newBoard[i][j + 1] > 0)) {
+                        continue;
+                    }
+                    int tmp = newBoard[i][j];
+                    newBoard[i][j] = newBoard[i][j + 1];
+                    newBoard[i][j + 1] = tmp;
+                    changed = true;
+                    break;
+                }
             }
+        } else {
+            int posI1 = -1, posJ1 = -1;
+            int posI2 = -1, posJ2 = -1;
+            int ref = 1;
+            for (int i = 0; i < length; i += 1) {
+                for (int j = 0; j < length; j += 1) {
+                    if (board[i][j] != ref && board[i][j] != 0) {
+                        if (posI1 == -1) {
+                            posI1 = i;
+                            posJ1 = j;
+                        } else {
+                            posI2 = i;
+                            posJ2 = j;
+                        }
+                    }
+                    ref += 1;
+                }
+            }
+            return getNeighbor(newBoard, posI1, posJ1, posI2, posJ2);
+
         }
 
         return new Board(newBoard);
