@@ -64,8 +64,8 @@ public class Board {
                 if (val == ref++ || val == 0) {
                     continue;
                 }
-                int refI = val / length;
-                int refJ = val % length - 1;
+                int refI = (val - 1) / length;
+                int refJ = (val - 1) % length;
                 cnt += Math.abs(i - refI) + Math.abs(j - refJ);
             }
         }
@@ -96,16 +96,16 @@ public class Board {
         return i >= 0 && i < length && j >= 0 && j < length;
     }
 
-    private int[][] copyBoard(int[][] board) {
+    private int[][] copyBoard(int[][] srcBoard) {
         int[][] tiles = new int[length][length];
         for (int i = 0; i < length; i += 1) {
-            System.arraycopy(board[i], 0, tiles[i], 0, length);
+            System.arraycopy(srcBoard[i], 0, tiles[i], 0, length);
         }
         return tiles;
     }
 
-    private Board getNeighbor(int[][] board, int pos0I, int pos0J, int exI, int exJ) {
-        int[][] tiles = copyBoard(board);
+    private Board getNeighbor(int[][] srcBoard, int pos0I, int pos0J, int exI, int exJ) {
+        int[][] tiles = copyBoard(srcBoard);
         int tmp = tiles[pos0I][pos0J];
         tiles[pos0I][pos0J] = tiles[exI][exJ];
         tiles[exI][exJ] = tmp;
@@ -256,6 +256,10 @@ public class Board {
         Board board3 = new Board(tiles2);
         StdOut.println(board3.twin());
         StdOut.println();
+
+        int[][] array0 = {{1, 0}, {2, 3}};
+        Board b0 = new Board(array0);
+        b0.manhattan();
 
     }
 

@@ -2,114 +2,98 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Deque;
-import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.Comparator;
 
 public class Solver {
 
-    private Board target;
     private boolean isSolvable;
-    private int move;
-
-    // board variables
-    private final MinPQ<Board> pq;
-    private final Map<Board, Board> parent;
-    private final Map<Board, Integer> moves;
-    private final HashSet<Board> searched;
-    private Deque<Board> solution;
-
-    // caches
-    private final HashMap<Board, Integer> manhattanCache;
-    private final HashMap<Board, Integer> hammingCache;
-
+    private int moves;
+    private LinkedList<Board> solution;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
         if (initial == null) {
             throw new IllegalArgumentException("Cannot add a null to Solver constructor");
         }
-        // init variables
-        pq = new MinPQ<>(new pqComparator<>());
-        parent = new HashMap<>();
-        parent.put(initial, null);
-        moves = new HashMap<>();
-        moves.put(initial, 0);
-        searched = new HashSet<>();
-        move = -1;
-        solution = null;
-        hammingCache = new HashMap<>();
-        manhattanCache = new HashMap<>();
 
-        // solve the problem
-        astar(initial);
+        // initialize variables
+        MinPQ<SearchNode> searchNodePQ = new MinPQ<>(new SearchNodeComparator<>());
+        SearchNode initialNode = new SearchNode(initial, 0, null);
+        searchNodePQ.insert(initialNode);
+        moves = -1;
+        solution = new LinkedList<>();
 
-        // get moves and solution
-        if (isSolvable) {
-            move = moves.get(target);
-            solution = new LinkedList<>();
-            Board path = target;
-            while (path != null) {
-                solution.push(path);
-                path = parent.get(path);
+        SearchNode last = null;
+
+        while (true) {
+            // A* search body
+            SearchNode minNode = searchNodePQ.delMin();
+
+            if (minNode.getState().isGoal()) {
+                isSolvable = true;
+                last = minNode;
+                break;
             }
+
+            Board currentBoard = minNode.getState();
+            for (Board neighbor: currentBoard.neighbors()) {
+                if (minNode.getParent() != null
+                        && neighbor.equals(minNode.getParent().getState())) {
+                    continue;
+                }
+                SearchNode neighborNode =
+                        new SearchNode(neighbor, minNode.getMoves() + 1, minNode);
+                searchNodePQ.insert(neighborNode);
+            }
+        }
+
+        SearchNode pointer = last;
+
+        while (pointer != null) {
+            solution.push(pointer.getState());
+            moves += 1;
+            pointer = pointer.getParent();
         }
     }
 
-    private class pqComparator<T extends Board> implements Comparator<T> {
+    private static class SearchNode {
+
+        private Board state;
+        private int moves;
+        private SearchNode parent;
+
+        public SearchNode(Board state, int moves, SearchNode parent) {
+            this.state = state;
+            this.moves = moves;
+            this.parent = parent;
+        }
+
+        public Board getState() {
+            return state;
+        }
+
+        public int getMoves() {
+            return moves;
+        }
+
+        public SearchNode getParent() {
+            return parent;
+        }
+
+    }
+
+    private static class SearchNodeComparator<T extends SearchNode> implements Comparator<T> {
+
         @Override
         public int compare(T o1, T o2) {
-            if (manhattanCache.get(o1) == null) {
-                manhattanCache.put(o1, o1.manhattan());
-            }
-            if (manhattanCache.get(o2) == null) {
-                manhattanCache.put(o2, o2.manhattan());
-            }
-            int dis1 = moves.get(o1) + manhattanCache.get(o1);
-            int dis2 = moves.get(o2) + manhattanCache.get(o2);
+            Board board1 = o1.getState();
+            Board board2 = o2.getState();
+            int moves1 = o1.getMoves() + board1.manhattan();
+            int moves2 = o2.getMoves() + board2.manhattan();
 
-            return dis1 - dis2;
+            return moves1 - moves2;
         }
-    }
-
-    private void astar(Board state) {
-        if (hammingCache.get(state) == null) {
-            hammingCache.put(state, state.hamming());
-        }
-        if (hammingCache.get(state) == 2) {
-            if (state.twin().isGoal()) {
-                isSolvable = false;
-                return;
-            }
-        }
-        if (state.isGoal()) {
-            target = state;
-            isSolvable = true;
-            return;
-        }
-
-        // mark state as searched
-        searched.add(state);
-
-        // insert neighbors to priority queue
-        for (Board neighbor: state.neighbors()) {
-            if (searched.contains(neighbor)) {
-                continue;
-            }
-            if (hammingCache.get(neighbor) == null) {
-                hammingCache.put(neighbor, neighbor.hamming());
-            }
-            moves.put(neighbor, moves.get(state) + 1);
-            pq.insert(neighbor);
-            parent.put(neighbor, state);
-        }
-
-        Board minBoard = pq.delMin();
-
-        astar(minBoard);
     }
 
     // is the initial board solvable? (see below)
@@ -120,7 +104,7 @@ public class Solver {
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-        return move;
+        return moves;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
