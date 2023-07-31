@@ -21,16 +21,17 @@ public class Board {
 
     // string representation of this board
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(length).append("\n");
-        for (int i = 0; i < length; i += 1) {
-            stringBuilder.append(" ");
-            for (int j = 0; j < length; j += 1) {
-                stringBuilder.append(board[i][j]).append("  ");
+        StringBuilder s = new StringBuilder();
+        int N = dimension();
+        s.append(N + "\n");
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                s.append(String.format("%2d ", board[i][j]));
             }
-            stringBuilder.append("\n");
+            s.append("\n");
         }
-        return stringBuilder.toString();
+        s.append("\n");
+        return s.toString();
     }
 
     // board dimension n
