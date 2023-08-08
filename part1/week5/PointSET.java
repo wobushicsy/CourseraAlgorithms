@@ -124,6 +124,5 @@ public class PointSET {
         StdOut.println(pointSet.nearest(new Point2D(0.55, 0.4)));
         StdOut.println((new PointSET()).nearest(new Point2D(0.0, 0.0)));
 
-
     }
 }

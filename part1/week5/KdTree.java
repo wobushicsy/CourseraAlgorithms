@@ -1,12 +1,9 @@
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
 import edu.princeton.cs.algs4.StdOut;
-import sun.awt.image.ImageWatched;
 
-import java.util.Iterator;
 import java.util.Queue;
 import java.util.LinkedList;
-import java.util.Queue;
 
 public class KdTree {
 
@@ -44,7 +41,7 @@ public class KdTree {
             return new KdTreeNode(point, depth % 2 == 0);
         }
         Point2D thisPoint = node.point;
-        double cmp = node.vertical ? thisPoint.y() - point.y() : thisPoint.x() - point.x();
+        double cmp = node.vertical ? point.x() - thisPoint.x() : point.y() - thisPoint.y();
         if (cmp >= 0) {
             node.right = insertHelper(node.right, point, depth + 1);
         } else {
@@ -54,11 +51,14 @@ public class KdTree {
         return node;
     }
 
-    public void insert(Point2D point2D) {
-        if (point2D == null) {
+    public void insert(Point2D point) {
+        if (point == null) {
             throw new IllegalArgumentException("you cannot call insert() by pass a null pointer");
         }
-        root = insertHelper(root, point2D, 0);
+        if (contains(point)) {
+            return;
+        }
+        root = insertHelper(root, point, 0);
         size += 1;
     }
 
@@ -70,7 +70,7 @@ public class KdTree {
         if (thisPoint.equals(point)) {
             return true;
         }
-        double cmp = node.vertical ? thisPoint.y() - point.y() : thisPoint.x() - point.x();
+        double cmp = node.vertical ? point.x() - thisPoint.x() : point.y() - thisPoint.y();
         if (cmp >= 0) {
             return containsHelper(node.right, point);
         } else {
@@ -105,12 +105,24 @@ public class KdTree {
     }
 
     private void rangeHelper(RectHV rect, KdTreeNode node, LinkedList<Point2D> list) {
+        if (node == null) {
+            return;
+        }
+
         Point2D point = node.point;
         if (rect.contains(point)) {
             list.add(point);
         }
 
-        
+        boolean searchRight = node.vertical ? point.x() <= rect.xmax() : point.y() <= rect.ymax();
+        boolean searchLeft  = node.vertical ? point.x() > rect.xmin() : point.y() > rect.ymin();
+
+        if (searchRight) {
+            rangeHelper(rect, node.right, list);
+        }
+        if (searchLeft) {
+            rangeHelper(rect, node.left, list);
+        }
 
     }
 
@@ -124,11 +136,45 @@ public class KdTree {
         return list;
     }
 
+    private double distanceBetween(Point2D point, KdTreeNode node) {
+        Point2D thisPoint = node.point;
+        return node.vertical ?
+                Math.pow(Math.abs(point.x() - thisPoint.x()), 2) :
+                Math.pow(Math.abs(point.y() - thisPoint.y()), 2);
+    }
+
+    private Point2D nearestHelper(KdTreeNode node, Point2D point, Point2D nearest) {
+        if (node == null) {
+            return nearest;
+        }
+        Point2D thisPoint = node.point;
+        if (nearest == null || point.distanceSquaredTo(thisPoint) < point.distanceSquaredTo(nearest)) {
+            nearest = thisPoint;
+        }
+
+        KdTreeNode goodSide, badSide;
+        if (node.vertical ? point.x() > thisPoint.x() : point.y() > thisPoint.y()) {
+            goodSide = node.right;
+            badSide = node.left;
+        } else {
+            goodSide = node.left;
+            badSide = node.right;
+        }
+
+        nearest = nearestHelper(goodSide, point, nearest);
+
+        if (distanceBetween(point, node) < point.distanceSquaredTo(nearest)) {
+            nearest = nearestHelper(badSide, point, nearest);
+        }
+
+        return nearest;
+    }
+
     public Point2D nearest(Point2D point) {
         if (point == null) {
             throw new IllegalArgumentException("you cannot call insert() by pass a null pointer");
         }
-        return null;
+        return nearestHelper(root, point, null);
     }
 
     public static void main(String[] args) {
