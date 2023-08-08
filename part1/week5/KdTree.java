@@ -1,32 +1,174 @@
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
+import edu.princeton.cs.algs4.StdOut;
+import sun.awt.image.ImageWatched;
+
+import java.util.Iterator;
+import java.util.Queue;
+import java.util.LinkedList;
+import java.util.Queue;
 
 public class KdTree {
-    public Iterable<Point2D> range(RectHV rect) {
-        return null;
+
+    private static class KdTreeNode {
+        private final Point2D point;
+        private final boolean vertical;
+        private KdTreeNode left;
+        private KdTreeNode right;
+
+        public KdTreeNode(Point2D p, boolean isVertical) {
+            point = p;
+            vertical = isVertical;
+        }
+
     }
 
-    public boolean contains(Point2D point) {
-        return false;
+    private int size;
+    private KdTreeNode root;
+
+    public KdTree() {
+        size = 0;
+        root = null;
     }
 
     public boolean isEmpty() {
-        return false;
-    }
-
-    public edu.princeton.cs.algs4.Point2D nearest(Point2D point) {
-        return null;
+        return size == 0;
     }
 
     public int size() {
-        return 0;
+        return size;
     }
 
-    public void draw() {
+    private KdTreeNode insertHelper(KdTreeNode node, Point2D point, int depth) {
+        if (node == null) {
+            return new KdTreeNode(point, depth % 2 == 0);
+        }
+        Point2D thisPoint = node.point;
+        double cmp = node.vertical ? thisPoint.y() - point.y() : thisPoint.x() - point.x();
+        if (cmp >= 0) {
+            node.right = insertHelper(node.right, point, depth + 1);
+        } else {
+            node.left = insertHelper(node.left, point, depth + 1);
+        }
 
+        return node;
     }
 
     public void insert(Point2D point2D) {
+        if (point2D == null) {
+            throw new IllegalArgumentException("you cannot call insert() by pass a null pointer");
+        }
+        root = insertHelper(root, point2D, 0);
+        size += 1;
+    }
+
+    private boolean containsHelper(KdTreeNode node, Point2D point) {
+        if (node == null) {
+            return false;
+        }
+        Point2D thisPoint = node.point;
+        if (thisPoint.equals(point)) {
+            return true;
+        }
+        double cmp = node.vertical ? thisPoint.y() - point.y() : thisPoint.x() - point.x();
+        if (cmp >= 0) {
+            return containsHelper(node.right, point);
+        } else {
+            return containsHelper(node.left, point);
+        }
+    }
+
+    public boolean contains(Point2D point) {
+        if (point == null) {
+            throw new IllegalArgumentException("you cannot call contains() by pass a null pointer");
+        }
+
+        return containsHelper(root, point);
+    }
+
+    public void draw() {
+        if (isEmpty()) {
+            return;
+        }
+        Queue<KdTreeNode> queue = new LinkedList<>();
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            KdTreeNode node = queue.remove();
+            node.point.draw();
+            if (node.left != null) {
+                queue.add(node.left);
+            }
+            if (node.right != null) {
+                queue.add(node.right);
+            }
+        }
+    }
+
+    private void rangeHelper(RectHV rect, KdTreeNode node, LinkedList<Point2D> list) {
+        Point2D point = node.point;
+        if (rect.contains(point)) {
+            list.add(point);
+        }
+
+        
+
+    }
+
+    public Iterable<Point2D> range(RectHV rect) {
+        if (rect == null) {
+            throw new IllegalArgumentException("you cannot call range() by pass a null pointer");
+        }
+        LinkedList<Point2D> list = new LinkedList<>();
+        rangeHelper(rect, root, list);
+
+        return list;
+    }
+
+    public Point2D nearest(Point2D point) {
+        if (point == null) {
+            throw new IllegalArgumentException("you cannot call insert() by pass a null pointer");
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        KdTree pointSet = new KdTree();
+
+        // insert test
+        pointSet.insert(new Point2D(0.7, 0.2));
+        pointSet.insert(new Point2D(0.5, 0.4));
+        pointSet.insert(new Point2D(0.2, 0.3));
+        pointSet.insert(new Point2D(0.4, 0.7));
+        pointSet.insert(new Point2D(0.9, 0.6));
+
+
+        // isEmpty test
+        StdOut.println(pointSet.isEmpty());
+        StdOut.println();
+
+
+        // size test
+        StdOut.println(pointSet.size());
+        StdOut.println();
+
+
+        // contains test
+        StdOut.println(pointSet.contains(new Point2D(0.1, 0.1)));
+        StdOut.println(pointSet.contains(new Point2D(0.7, 0.2)));
+        StdOut.println();
+
+
+        // range test
+        for (Point2D point: pointSet.range(new RectHV(0.45, 0.1, 0.75, 0.45))) {
+            StdOut.println(point);
+        }
+        StdOut.println();
+
+
+        // nearest test
+        StdOut.println(pointSet.nearest(new Point2D(0.55, 0.4)));
+        StdOut.println((new PointSET()).nearest(new Point2D(0.0, 0.0)));
+
 
     }
 }
