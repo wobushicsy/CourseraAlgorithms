@@ -20,9 +20,15 @@ public class WordNet {
     private SAP sap;
 
 
-    private void checkArgument(String s) {
+    private void checkArgument(Object s) {
         if (s == null) {
             throw new IllegalArgumentException("you can't pass a null to function");
+        }
+    }
+
+    private void checkNoun(String s) {
+        if (!isNoun(s)) {
+            throw new IllegalArgumentException("you can't pass a not noun to function");
         }
     }
 
@@ -87,6 +93,9 @@ public class WordNet {
     }
 
     private int getId(String noun) {
+        checkArgument(noun);
+        checkNoun(noun);
+
         return synset.get(noun);
     }
 
@@ -94,6 +103,8 @@ public class WordNet {
     public int distance(String nounA, String nounB) {
         checkArgument(nounA);
         checkArgument(nounB);
+        checkNoun(nounA);
+        checkNoun(nounB);
 
         int idA = getId(nounA);
         int idB = getId(nounB);
@@ -106,6 +117,8 @@ public class WordNet {
     public String sap(String nounA, String nounB) {
         checkArgument(nounA);
         checkArgument(nounB);
+        checkNoun(nounA);
+        checkNoun(nounB);
 
         int idA = getId(nounA);
         int idB = getId(nounB);

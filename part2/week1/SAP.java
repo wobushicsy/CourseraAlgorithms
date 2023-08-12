@@ -11,13 +11,30 @@ public class SAP {
 
     private Digraph graph;
 
+    private void checkArgument(Object obj) {
+        if (obj == null) {
+            throw new IllegalArgumentException("you can't pass a null to function");
+        }
+    }
+
+    private void checkVertex(int vertex) {
+        if (vertex >= graph.V()) {
+            throw new IllegalArgumentException("Segmentation fault: vertex not included");
+        }
+    }
+
     // constructor takes a digraph (not necessarily a DAG)
     public SAP(Digraph G) {
+        checkArgument(G);
+
         graph = G;
     }
 
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
+        checkVertex(v);
+        checkVertex(w);
+
         int ancestor = -1;
 
         Queue<Integer> queue = new LinkedList<>();
@@ -70,6 +87,9 @@ public class SAP {
 
     // a common ancestor of v and w that participates in a shortest ancestral path; -1 if no such path
     public int ancestor(int v, int w) {
+        checkVertex(v);
+        checkVertex(w);
+
         int ancestor = -1;
 
         Queue<Integer> queue = new LinkedList<>();
@@ -115,6 +135,17 @@ public class SAP {
 
     // length of shortest ancestral path between any vertex in v and any vertex in w; -1 if no such path
     public int length(Iterable<Integer> v, Iterable<Integer> w) {
+        checkArgument(v);
+        checkArgument(w);
+        for (Integer i: v) {
+            checkArgument(i);
+            checkVertex(i);
+        }
+        for (Integer i: w) {
+            checkArgument(i);
+            checkVertex(i);
+        }
+
         int length = Integer.MAX_VALUE;
         int len;
         boolean hasPath = false;
@@ -137,6 +168,17 @@ public class SAP {
 
     // a common ancestor that participates in shortest ancestral path; -1 if no such path
     public int ancestor(Iterable<Integer> v, Iterable<Integer> w) {
+        checkArgument(v);
+        checkArgument(w);
+        for (Integer i: v) {
+            checkArgument(i);
+            checkVertex(i);
+        }
+        for (Integer i: w) {
+            checkArgument(i);
+            checkVertex(i);
+        }
+
         int length = Integer.MAX_VALUE;
         int minI = 0;
         int minJ = 0;
