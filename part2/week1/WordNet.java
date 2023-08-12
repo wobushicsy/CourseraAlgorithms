@@ -2,35 +2,16 @@ import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.HashMap;
 
 public class WordNet {
 
     // a hashtable between synset and id
-    private Hashtable<String, Integer> synset;
-    private Hashtable<Integer, String> idset;
-
-    // Digraph
-    private Digraph graph;
+    private final HashMap<String, Integer> synset;
+    private final HashMap<Integer, String> idset;
 
     // SAP
-    private SAP sap;
-
-
-    private void checkArgument(Object s) {
-        if (s == null) {
-            throw new IllegalArgumentException("you can't pass a null to function");
-        }
-    }
-
-    private void checkNoun(String s) {
-        if (!isNoun(s)) {
-            throw new IllegalArgumentException("you can't pass a not noun to function");
-        }
-    }
+    private final SAP sap;
 
     // constructor takes the name of the two input files
     public WordNet(String synsets, String hypernyms) {
@@ -38,8 +19,8 @@ public class WordNet {
         checkArgument(hypernyms);
 
         // initialize class variables
-        synset = new Hashtable<>();
-        idset = new Hashtable<>();
+        synset = new HashMap<>();
+        idset = new HashMap<>();
 
         // initialize local variables
         In synsetsIn = new In(synsets);
@@ -47,6 +28,7 @@ public class WordNet {
         String buffer;
         String[] splitedBuffer;
         int cnt = 0;
+        Digraph graph;
 
         // process synsets data
         while (!synsetsIn.isEmpty()) {
@@ -57,7 +39,9 @@ public class WordNet {
 
             // sp[0] = "{num}", sp[1] = {noun synset}, sp[2:] = {gloss}(not relevant)
             int id = Integer.parseInt(splitedBuffer[0]);
-            synset.put(splitedBuffer[1], id);
+            for (String s: splitedBuffer[1].split(" ")) {
+                synset.put(s, id);
+            }
             idset.put(id, splitedBuffer[1]);
         }
 
@@ -70,14 +54,30 @@ public class WordNet {
             splitedBuffer = buffer.split(",");
             int index = Integer.parseInt(splitedBuffer[0]);
             for (int i = 1; i < splitedBuffer.length; i += 1) {
-                graph.addEdge(index, Integer.parseInt(splitedBuffer[i]));
+                int hyperIndex = Integer.parseInt(splitedBuffer[i]);
+                String hyper = idset.get(hyperIndex);
+                String[] hypers = hyper.split(" ");
+                for (String s: hypers) {
+                    int x = synset.get(s);
+                    graph.addEdge(index, synset.get(s));
+                }
             }
         }
 
         // initialize SAP
         sap = new SAP(graph);
+    }
 
-//        StdOut.println(synset.get("AND_circuit AND_gate"));
+    private void checkArgument(Object s) {
+        if (s == null) {
+            throw new IllegalArgumentException("you can't pass a null to function");
+        }
+    }
+
+    private void checkNoun(String s) {
+        if (!isNoun(s)) {
+            throw new IllegalArgumentException("you can't pass a not noun to function");
+        }
     }
 
     // returns all WordNet nouns
@@ -132,10 +132,6 @@ public class WordNet {
     public static void main(String[] args) {
         WordNet wordNet = new WordNet("synsets.txt", "hypernyms.txt");
 
-        // isNoun() test
-        StdOut.println(wordNet.isNoun("AND_circuit AND_Gate"));
-        StdOut.println(wordNet.isNoun("AND_circuit AND_gate"));
-        StdOut.println(wordNet.isNoun("gate logic_gate"));
-        StdOut.println(wordNet.isNoun("wobushicsy"));
+        StdOut.println(wordNet.distance("spillway", "grinder"));
     }
 }

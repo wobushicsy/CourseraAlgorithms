@@ -3,13 +3,20 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.StdIn;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class SAP {
 
-    private Digraph graph;
+    private final Digraph graph;
+
+    // constructor takes a digraph (not necessarily a DAG)
+    public SAP(Digraph G) {
+        checkArgument(G);
+
+        graph = new Digraph(G);
+    }
 
     private void checkArgument(Object obj) {
         if (obj == null) {
@@ -23,13 +30,6 @@ public class SAP {
         }
     }
 
-    // constructor takes a digraph (not necessarily a DAG)
-    public SAP(Digraph G) {
-        checkArgument(G);
-
-        graph = G;
-    }
-
     // length of shortest ancestral path between v and w; -1 if no such path
     public int length(int v, int w) {
         checkVertex(v);
@@ -39,7 +39,7 @@ public class SAP {
 
         Queue<Integer> queue = new LinkedList<>();
         queue.add(v);
-        Hashtable<Integer, Integer> distanceA = new Hashtable<>();
+        HashMap<Integer, Integer> distanceA = new HashMap<>();
         distanceA.put(v, 0);
 
         // bfs add nounA's hyper
@@ -56,15 +56,23 @@ public class SAP {
         }
 
         queue.add(w);
-        Hashtable<Integer, Integer> distanceB = new Hashtable<>();
+        HashMap<Integer, Integer> distanceB = new HashMap<>();
         distanceB.put(w, 0);
+        int minDis = Integer.MAX_VALUE;
+
         // search nounB's hyper
         while (!queue.isEmpty()) {
             int id = queue.remove();
             int dis = distanceB.get(id);
-            if (distanceA.containsKey(id)) {
-                ancestor = id;
+            if (dis > minDis) {
                 break;
+            }
+            if (distanceA.containsKey(id)) {
+                int currentDis = distanceA.get(id) + dis;
+                if (currentDis < minDis) {
+                    ancestor = id;
+                    minDis = currentDis;
+                }
             }
             for (int neighbor: graph.adj(id)) {
                 if (distanceB.containsKey(neighbor)) {
@@ -94,7 +102,7 @@ public class SAP {
 
         Queue<Integer> queue = new LinkedList<>();
         queue.add(v);
-        Hashtable<Integer, Integer> distanceA = new Hashtable<>();
+        HashMap<Integer, Integer> distanceA = new HashMap<>();
         distanceA.put(v, 0);
 
         // bfs add nounA's hyper
@@ -111,15 +119,23 @@ public class SAP {
         }
 
         queue.add(w);
-        Hashtable<Integer, Integer> distanceB = new Hashtable<>();
+        HashMap<Integer, Integer> distanceB = new HashMap<>();
         distanceB.put(w, 0);
+        int minDis = Integer.MAX_VALUE;
+
         // search nounB's hyper
         while (!queue.isEmpty()) {
             int id = queue.remove();
             int dis = distanceB.get(id);
-            if (distanceA.containsKey(id)) {
-                ancestor = id;
+            if (dis > minDis) {
                 break;
+            }
+            if (distanceA.containsKey(id)) {
+                int currentDis = distanceA.get(id) + dis;
+                if (currentDis < minDis) {
+                    ancestor = id;
+                    minDis = currentDis;
+                }
             }
             for (int neighbor: graph.adj(id)) {
                 if (distanceB.containsKey(neighbor)) {
@@ -193,6 +209,7 @@ public class SAP {
                 if (len < length) {
                     minI = i;
                     minJ = j;
+                    length = len;
                 }
                 hasAncestor = true;
             }
@@ -213,17 +230,5 @@ public class SAP {
             int ancestor = sap.ancestor(v, w);
             StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
         }
-
-//        LinkedList<Integer> A = new LinkedList<>();
-//        A.add(3);
-//        A.add(9);
-//        A.add(7);
-//        A.add(1);
-//        LinkedList<Integer> B = new LinkedList<>();
-//        B.add(11);
-//        B.add(12);
-//        B.add(2);
-//        B.add(6);
-//        StdOut.printf("length = %d, ancestor = %d\n", sap.length(A, B), sap.ancestor(A, B));
     }
 }
