@@ -1,13 +1,15 @@
 import edu.princeton.cs.algs4.Digraph;
+import edu.princeton.cs.algs4.DirectedCycle;
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdOut;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class WordNet {
 
     // a hashtable between synset and id
-    private final HashMap<String, Integer> synset;
+    private final HashMap<String, HashSet<Integer>> synset;
     private final HashMap<Integer, String> idset;
 
     // SAP
@@ -40,7 +42,18 @@ public class WordNet {
             // sp[0] = "{num}", sp[1] = {noun synset}, sp[2:] = {gloss}(not relevant)
             int id = Integer.parseInt(splitedBuffer[0]);
             for (String s: splitedBuffer[1].split(" ")) {
-                synset.put(s, id);
+                if (synset.containsKey(s)) {
+                    HashSet<Integer> set = synset.get(s);
+                    if (set.contains(id)) {
+                        continue;
+                    } else {
+                        set.add(id);
+                    }
+                } else {
+                    HashSet<Integer> set = new HashSet<>();
+                    set.add(id);
+                    synset.put(s, set);
+                }
             }
             idset.put(id, splitedBuffer[1]);
         }
@@ -55,17 +68,14 @@ public class WordNet {
             int index = Integer.parseInt(splitedBuffer[0]);
             for (int i = 1; i < splitedBuffer.length; i += 1) {
                 int hyperIndex = Integer.parseInt(splitedBuffer[i]);
-                String hyper = idset.get(hyperIndex);
-                String[] hypers = hyper.split(" ");
-                for (String s: hypers) {
-                    int x = synset.get(s);
-                    graph.addEdge(index, synset.get(s));
-                }
+                graph.addEdge(index, hyperIndex);
             }
         }
 
         // initialize SAP
         sap = new SAP(graph);
+
+        checkDAG(graph);
     }
 
     private void checkArgument(Object s) {
@@ -77,6 +87,23 @@ public class WordNet {
     private void checkNoun(String s) {
         if (!isNoun(s)) {
             throw new IllegalArgumentException("you can't pass a not noun to function");
+        }
+    }
+
+    private void checkDAG(Digraph G) {
+        DirectedCycle graph = new DirectedCycle(G);
+        if (graph.hasCycle()) {
+            throw new IllegalArgumentException("not a DAG");
+        }
+
+        int roots = 0;
+        for (int vertex = 0; vertex < G.V(); vertex++) {
+            if (!G.adj(vertex).iterator().hasNext()) {
+                roots++;
+            }
+        }
+        if (roots != 1) {
+            throw new IllegalArgumentException("not a DAG");
         }
     }
 
@@ -92,7 +119,7 @@ public class WordNet {
         return synset.containsKey(word);
     }
 
-    private int getId(String noun) {
+    private Iterable<Integer> getId(String noun) {
         checkArgument(noun);
         checkNoun(noun);
 
@@ -106,8 +133,8 @@ public class WordNet {
         checkNoun(nounA);
         checkNoun(nounB);
 
-        int idA = getId(nounA);
-        int idB = getId(nounB);
+        Iterable<Integer> idA = getId(nounA);
+        Iterable<Integer> idB = getId(nounB);
 
         return sap.length(idA, idB);
     }
@@ -120,8 +147,8 @@ public class WordNet {
         checkNoun(nounA);
         checkNoun(nounB);
 
-        int idA = getId(nounA);
-        int idB = getId(nounB);
+        Iterable<Integer> idA = getId(nounA);
+        Iterable<Integer> idB = getId(nounB);
 
         int ancID = sap.ancestor(idA, idB);
 
