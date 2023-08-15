@@ -33,7 +33,7 @@ public class SeamCarver {
 
     // current picture
     public Picture picture() {
-        return picture;
+        return new Picture(picture);
     }
 
     // width of current picture
@@ -59,7 +59,6 @@ public class SeamCarver {
         return rx * rx + gx * gx + bx * bx;
     }
 
-
     // energy of pixel at column x and row y
     public double energy(int x, int y) {
         checkIndices(x, y);
@@ -68,7 +67,7 @@ public class SeamCarver {
             return 1000;
         }
 
-        int deltaXSquared = getSquaredDelta(x - 1 , y, x + 1, y);
+        int deltaXSquared = getSquaredDelta(x - 1, y, x + 1, y);
         int deltaYSquared = getSquaredDelta(x, y - 1, x, y + 1);
 
         return Math.sqrt(deltaXSquared + deltaYSquared);
@@ -80,11 +79,11 @@ public class SeamCarver {
     }
 
     private Picture transpose(Picture pic) {
-        int width = pic.width();
-        int height = pic.height();
-        Picture newPic = new Picture(height, width);
-        for (int i = 0; i < height; i += 1) {
-            for (int j = 0; j < width; j += 1) {
+        int newHeight = pic.width();
+        int newWidth = pic.height();
+        Picture newPic = new Picture(newWidth, newHeight);
+        for (int i = 0; i < newWidth; i += 1) {
+            for (int j = 0; j < newHeight; j += 1) {
                 newPic.set(i, j, pic.get(j, i));
             }
         }
@@ -104,6 +103,19 @@ public class SeamCarver {
     public int[] findVerticalSeam() {
         int height = height();
         int width = width();
+
+        int[] ans = new int[height];
+        for (int i = 0; i < height; i += 1) {
+            ans[i] = 0;
+        }
+
+        if (width == 1 || width == 2) {
+            return ans;
+        }
+        if (height == 1 || height == 2) {
+            return ans;
+        }
+
         double[][] energy = new double[height][width];
         for (int i = 0; i < height; i += 1) {
             for (int j = 0; j < width; j += 1) {
@@ -163,7 +175,6 @@ public class SeamCarver {
             }
         }
 
-        int[] ans = new int[height];
         for (int pointer = vertices - 1; edgeTo[pointer] != pointer; pointer = edgeTo[pointer]) {
             int index = pointer - 1 + width;
             int i = index / width;
@@ -177,6 +188,20 @@ public class SeamCarver {
         return ans;
     }
 
+    private void validateSeam(int[] seam) {
+        if (seam.length != picture.height()) {
+            throw new IllegalArgumentException("Seam length is not correct");
+        }
+        int width = picture.width();
+        int pre = seam[0];
+        for (int i : seam) {
+            if (i >= width || i < 0 || Math.abs(pre - i) > 1) {
+                throw new IllegalArgumentException("Seam data is not correct");
+            }
+            pre = i;
+        }
+    }
+
     // remove horizontal seam from current picture
     public void removeHorizontalSeam(int[] seam) {
         checkNull(seam);
@@ -184,14 +209,19 @@ public class SeamCarver {
         Picture newPic = transpose(picture);
         SeamCarver sc = new SeamCarver(newPic);
 
-        sc.removeVerticalSeam(sc.findVerticalSeam());
+        sc.removeVerticalSeam(seam);
 
-        this.picture = transpose(sc.picture());
+        this.picture = transpose(sc.picture);
     }
 
     // remove vertical seam from current picture
     public void removeVerticalSeam(int[] seam) {
         checkNull(seam);
+        validateSeam(seam);
+
+        if (width() <= 1) {
+            throw new IllegalArgumentException("Can't remove");
+        }
 
         int height = height();
         int width = width();
@@ -210,20 +240,14 @@ public class SeamCarver {
 
     //  unit testing (optional)
     public static void main(String[] args) {
-        Picture picture = new Picture("3x4.png");
-        StdOut.printf("image is %d pixels wide by %d pixels high.\n", picture.width(), picture.height());
-
+        Picture picture = new Picture("2x2.png");
+        StdOut.printf("image is %d columns by %d rows\n", picture.width(), picture.height());
+        picture.show();
         SeamCarver sc = new SeamCarver(picture);
 
-        StdOut.printf("Printing energy calculated for each pixel.\n");
-
-        StdOut.println(sc.height());
-        StdOut.println(sc.width());
-
-        sc.findHorizontalSeam();
-
-//        sc.removeVerticalSeam(sc.findVerticalSeam());
         sc.removeHorizontalSeam(sc.findHorizontalSeam());
+
+
     }
 
 }
