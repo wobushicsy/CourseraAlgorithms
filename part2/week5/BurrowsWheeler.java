@@ -2,8 +2,7 @@ import edu.princeton.cs.algs4.BinaryStdIn;
 import edu.princeton.cs.algs4.BinaryStdOut;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public class BurrowsWheeler {
 
@@ -28,44 +27,35 @@ public class BurrowsWheeler {
         BinaryStdOut.close();
     }
 
-    private static String sortString(String input) {
-        char[] tempArray = input.toCharArray();
-        Arrays.sort(tempArray);
-        return new String(tempArray);
-    }
-
     // apply Burrows-Wheeler inverse transform,
     // reading from standard input and writing to standard output
     public static void inverseTransform() {
-        String inputString = BinaryStdIn.readString();
-        int first = Integer.parseInt(inputString.substring(0, 4));
-        String sortedSuffixLastCol = inputString.substring(4);
-        String sortedSuffixFirstCol = sortString(sortedSuffixLastCol);
-        int length = sortedSuffixLastCol.length();
-
-        int[] next = new int[length];
-        HashMap<Character, Integer> appearOnce = new HashMap<>();
-        for (int i = 0; i < length; i += 1) {
-            char c = sortedSuffixLastCol.charAt(i);
-            if (appearOnce.containsKey(c)) {
-                appearOnce.put(c, appearOnce.get(c) + 1);
-            } else {
-                appearOnce.put(c, 1);
-            }
+        int first = BinaryStdIn.readInt();
+        ArrayList<Character> t = new ArrayList<>();
+        while (!BinaryStdIn.isEmpty()) {
+            t.add(BinaryStdIn.readChar());
         }
-
-        for (char key : appearOnce.keySet()) {
-            if (appearOnce.get(key) != 1) {
-                continue;
-            }
-            int firstIndex = 0;
-            for (int i = 0; i < length; i += 1) {
-                if (sortedSuffixFirstCol.charAt(i) == key) {
-
+        char[] firstColumn = new char[t.size()];
+        int[] next = new int[t.size()];
+        for (int i = 0; i < t.size(); i++) {
+            firstColumn[i] = t.get(i);
+        }
+        Arrays.sort(firstColumn);
+        for (int i = 0; i < t.size(); ) {
+            int j = i + 1;
+            while (j < t.size() && firstColumn[j] == firstColumn[j - 1]) j++;
+            for (int k = 0; k < t.size(); k++) {
+                if (t.get(k) == firstColumn[i]) {
+                    next[i++] = k;
+                    if (i == j) break;
                 }
             }
         }
-
+        int pointer = first;
+        for (int i = 0; i < next.length; i++) {
+            BinaryStdOut.write(firstColumn[pointer]);
+            pointer = next[pointer];
+        }
 
         BinaryStdIn.close();
         BinaryStdOut.close();
